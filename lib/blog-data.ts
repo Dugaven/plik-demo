@@ -64,33 +64,22 @@ function hexToString(hex: string): string {
 }
 
 function transformBlogPost(post: any): BlogPost {
-  console.log("[v0] Transforming blog post:", post.post_title)
-  console.log("[v0] Raw media_upload value:", post.media_upload)
-  console.log("[v0] media_upload type:", typeof post.media_upload)
+  console.log("Transforming blog post:", post.post_title)
 
   let imageUrl = post.media_upload || "/placeholder.svg?height=400&width=600"
 
   if (imageUrl && typeof imageUrl === "string" && isHexEncoded(imageUrl)) {
-    console.log("[v0] Detected hex-encoded image URL, decoding...")
-    console.log("[v0] Hex string:", imageUrl)
     imageUrl = hexToString(imageUrl)
-    console.log("[v0] First decode result:", imageUrl)
-
-    if (isHexEncoded(imageUrl)) {
-      console.log("[v0] Detected double hex-encoding, decoding again...")
-      imageUrl = hexToString(imageUrl)
-      console.log("[v0] Second decode result:", imageUrl)
-    }
   } else {
-    console.log("[v0] Image URL is not hex-encoded or is not a string")
+    // Image URL is not hex-encoded or is not a string
   }
 
   if (imageUrl && !imageUrl.startsWith("http") && !imageUrl.startsWith("/")) {
-    console.log("[v0] Invalid decoded URL, using fallback")
+    // Invalid decoded URL, using fallback
     imageUrl = "/placeholder.svg?height=400&width=600"
   }
 
-  console.log("[v0] Final image URL:", imageUrl)
+
 
   return {
     id: post.id.toString(),
@@ -120,7 +109,6 @@ function transformBlogPost(post: any): BlogPost {
 }
 
 export async function getAllPosts(): Promise<BlogPost[]> {
-  console.log("[v0] Fetching all blog posts from Supabase")
   const { data, error } = await supabase.from("blog_post").select("*").order("created_at", { ascending: false })
 
   if (error) {
@@ -132,7 +120,6 @@ export async function getAllPosts(): Promise<BlogPost[]> {
 }
 
 export async function getFeaturedPosts(): Promise<BlogPost[]> {
-  console.log("[v0] Fetching featured blog posts from Supabase")
   const { data, error } = await supabase
     .from("blog_post")
     .select("*")
@@ -148,7 +135,6 @@ export async function getFeaturedPosts(): Promise<BlogPost[]> {
 }
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | undefined> {
-  console.log("[v0] Fetching blog post by slug:", slug)
 
   const { data, error } = await supabase.from("blog_post").select("*")
 
@@ -163,7 +149,6 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | undefined>
   const transformedPosts = data.map(transformBlogPost)
   const matchingPost = transformedPosts.find((post) => post.slug === slug)
 
-  console.log("[v0] Found matching post for slug:", slug, matchingPost ? "YES" : "NO")
   return matchingPost
 }
 
@@ -184,7 +169,6 @@ export async function getPostsByCategory(category: string): Promise<BlogPost[]> 
 }
 
 export async function getRecentPosts(limit = 3): Promise<BlogPost[]> {
-  console.log("[v0] Fetching recent blog posts, limit:", limit)
   const { data, error } = await supabase
     .from("blog_post")
     .select("*")

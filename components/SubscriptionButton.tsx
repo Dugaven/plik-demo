@@ -15,7 +15,6 @@ export function SubscriptionButton({ plan, className, children }: SubscriptionBu
   const router = useRouter()
 
   const handleSubscribe = () => {
-    console.log("[v0] SubscriptionButton - Selected plan:", plan)
     localStorage.setItem("selectedPlan", plan)
     router.push("/auth/signup")
   }

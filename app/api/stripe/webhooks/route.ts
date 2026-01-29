@@ -7,7 +7,7 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text()
-    const headersList = headers()
+    const headersList = await headers()
     const signature = headersList.get("stripe-signature")!
 
     let event
@@ -18,12 +18,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
     }
 
-    console.log(`[v0] Received Stripe webhook: ${event.type}`)
+    console.log(`Received Stripe webhook: ${event.type}`)
 
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object
-        console.log(`[v0] Checkout completed for session: ${session.id}`)
+        console.log(`Checkout completed for session: ${session.id}`)
 
         if (session.mode === "subscription") {
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
                 stripe_subscription_id: subscription.id,
               },
             })
-            console.log(`[v0] Updated customer metadata for subscription: ${subscription.id}`)
+            console.log(`Updated customer metadata for subscription: ${subscription.id}`)
           }
         }
         break
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
               stripe_subscription_id: subscription.id,
             },
           })
-          console.log(`[v0] Updated subscription status: ${subscription.status}`)
+          console.log(`Updated subscription status: ${subscription.status}`)
         }
         break
       }
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
             subscription_end_date: new Date().toISOString(),
           },
         })
-        console.log(`[v0] Canceled subscription for customer: ${subscription.customer}`)
+        console.log(`Canceled subscription for customer: ${subscription.customer}`)
         break
       }
 
@@ -87,12 +87,12 @@ export async function POST(request: NextRequest) {
             subscription_status: "past_due",
           },
         })
-        console.log(`[v0] Payment failed for customer: ${invoice.customer}`)
+        console.log(`Payment failed for customer: ${invoice.customer}`)
         break
       }
 
       default:
-        console.log(`[v0] Unhandled webhook event type: ${event.type}`)
+        console.log(`Unhandled webhook event type: ${event.type}`)
     }
 
     return NextResponse.json({ received: true })
