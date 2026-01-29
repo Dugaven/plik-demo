@@ -14,19 +14,23 @@ export default function ProtectedRoute({ children, requiredPlan }: ProtectedRout
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null)
 
   useEffect(() => {
-    const session = getUserSession()
+    const checkAuth = async () => {
+      const session = await getUserSession()
 
-    if (!session) {
-      window.location.href = "/login"
-      return
+      if (!session) {
+        window.location.href = "/login"
+        return
+      }
+
+      if (!hasAccess(session, requiredPlan)) {
+        setIsAuthorized(false)
+        return
+      }
+
+      setIsAuthorized(true)
     }
 
-    if (!hasAccess(requiredPlan)) {
-      setIsAuthorized(false)
-      return
-    }
-
-    setIsAuthorized(true)
+    checkAuth()
   }, [requiredPlan])
 
   if (isAuthorized === null) {
