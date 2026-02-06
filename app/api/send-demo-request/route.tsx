@@ -5,14 +5,7 @@ export async function POST(request: NextRequest) {
   console.log("[v0] Demo request API called")
 
   try {
-    const formData = await request.formData()
-
-    const firstName = formData.get("firstName") as string
-    const lastName = formData.get("lastName") as string
-    const email = formData.get("email") as string
-    const company = formData.get("company") as string
-    const phone = formData.get("phone") as string
-    const message = formData.get("message") as string
+    const { firstName, lastName, email, company, phone, message } = await request.json()
 
     console.log("[v0] Form data received:", { firstName, lastName, email, company, phone })
 
