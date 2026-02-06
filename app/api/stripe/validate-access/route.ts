@@ -1,18 +1,27 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe"
 
-// Define CORS headers
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*", // Changed to allow any origin for demo
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-  "Access-Control-Max-Age": "86400",
+const ALLOWED_ORIGINS = [
+  "https://app.plik.ca",
+  "https://plik.ca",
+  "https://www.plik.ca",
+]
+
+function getCorsHeaders(request: NextRequest) {
+  const origin = request.headers.get("origin") || ""
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Max-Age": "86400",
+  }
 }
 
 export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, {
     status: 200,
-    headers: corsHeaders,
+    headers: getCorsHeaders(request),
   })
 }
 
@@ -31,7 +40,7 @@ export async function POST(request: NextRequest) {
         method: 'demo',
         isDemoMode: true
       },
-      { headers: corsHeaders }
+      { headers: getCorsHeaders(request) }
     )
   }
 
@@ -62,7 +71,7 @@ export async function POST(request: NextRequest) {
               planId: planId,
               method: "session",
             },
-            { headers: corsHeaders },
+            { headers: getCorsHeaders(request) },
           )
         }
       } catch (error) {
@@ -103,13 +112,8 @@ export async function POST(request: NextRequest) {
                 planId: planId,
                 method: "subscription",
                 subscriptionStatus: activeSubscription.status,
-                debug: {
-                  subscriptionId: activeSubscription.id,
-                  status: activeSubscription.status,
-                  planId: planId,
-                },
               },
-              { headers: corsHeaders },
+              { headers: getCorsHeaders(request) },
             )
           }
 
@@ -122,7 +126,7 @@ export async function POST(request: NextRequest) {
                 planId: customer.metadata.subscription_plan,
                 method: "metadata",
               },
-              { headers: corsHeaders },
+              { headers: getCorsHeaders(request) },
             )
           }
         }
@@ -135,9 +139,8 @@ export async function POST(request: NextRequest) {
       {
         valid: false,
         error: "No valid access found",
-        debug: { sessionId, customerId, email },
       },
-      { headers: corsHeaders },
+      { headers: getCorsHeaders(request) },
     )
   } catch (error) {
     console.error("Access validation error:", error)
@@ -148,7 +151,7 @@ export async function POST(request: NextRequest) {
       },
       {
         status: 500,
-        headers: corsHeaders,
+        headers: getCorsHeaders(request),
       },
     )
   }
