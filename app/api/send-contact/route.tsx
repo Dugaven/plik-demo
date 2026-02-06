@@ -1,12 +1,16 @@
 import { Resend } from "resend"
 import { type NextRequest, NextResponse } from "next/server"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function POST(request: NextRequest) {
   console.log("[v0] Contact form API called")
 
   try {
+    if (!process.env.RESEND_API_KEY) {
+      console.error("[v0] RESEND_API_KEY environment variable not found")
+      return NextResponse.json({ error: "Email service not configured" }, { status: 500 })
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY)
     const body = await request.json()
     const { firstName, lastName, email, question } = body
 
